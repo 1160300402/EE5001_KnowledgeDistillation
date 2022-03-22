@@ -24,7 +24,7 @@ from networks.evaluate import evaluate_main
 
 torch_ver = torch.__version__[:3]
 
-
+# hello
 class NetModel():
     def name(self):
         return 'kd_seg'
