@@ -103,7 +103,7 @@ def main():
         args.multiprocessing_distributed = False
     if args.multiprocessing_distributed:
         port = find_free_port()
-        args.dist_url = f"tcp://127.0.0.1:{port}"
+        args.dist_url = "tcp://127.0.0.1:{port}"
         args.world_size = args.ngpus_per_node * args.world_size
         mp.spawn(main_worker, nprocs=args.ngpus_per_node, args=(args.ngpus_per_node, args))
     else:

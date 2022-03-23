@@ -1,25 +1,15 @@
-import argparse
-import logging
-import os
-import pdb
 from torch.autograd import Variable
 import os.path as osp
-import torch
-from torch.optim.lr_scheduler import StepLR, MultiStepLR
-import numpy as np
-import resource
-import torch.autograd as autograd
-import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
-from utils.utils import *
+from util.utils import *
 import torch.backends.cudnn as cudnn
 
-from utils.criterion import CriterionDSN, CriterionOhemDSN, CriterionPixelWise, \
+from util.criterion import CriterionDSN, CriterionOhemDSN, CriterionPixelWise, \
     CriterionAdv, CriterionAdvForG, CriterionAdditionalGP, CriterionPairWiseforWholeFeatAfterPool
-import utils.parallel as parallel_old
-from networks.pspnet_combine import Res_pspnet, BasicBlock, Bottleneck
-from networks.sagan_models import Discriminator
+import util.parallel as parallel_old
+from model.pspnet import PSPNet
+# from networks.pspnet_combine import Res_pspnet, BasicBlock, Bottleneck
+from model.sagan_model import Discriminator
 from networks.evaluate import evaluate_main
 
 torch_ver = torch.__version__[:3]
@@ -31,7 +21,8 @@ class NetModel():
 
     def DataParallelModelProcess(self, model, ParallelModelType=1, is_eval='train', device='cuda'):
         if ParallelModelType == 1:
-            parallel_model = DataParallelModel(model)
+            pass # 3.22.2022 change
+            # parallel_model = DataParallelModel(model)
         elif ParallelModelType == 2:
             parallel_model = parallel_old.DataParallelModel(model)
         else:
@@ -55,7 +46,7 @@ class NetModel():
         cudnn.enabled = True
         self.args = args
         device = args.device
-        student = Res_pspnet(BasicBlock, [2, 2, 2, 2], num_classes=args.classes_num)
+        student = PSPNet(layers=args.layers, classes=args.classes, zoom_factor=args.zoom_factor, criterion=criterion)
         load_S_model(args, student, False)
         print_model_parm_nums(student, 'student_model')
         self.parallel_student = self.DataParallelModelProcess(student, 2, 'train', device)
